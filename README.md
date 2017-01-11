@@ -1,6 +1,7 @@
 # Alfresco Activiti User Task extension AMP, Activiti User Task extension model
 
 Activiti User Task extension model that provides out-of-the-box task approval/rejection functionality
+![](https://raw.githubusercontent.com/adgsm/eu-wbif-alfresco-workflow-commontask/gh-pages/common-user-task.png)
 
 ### Usage
 
