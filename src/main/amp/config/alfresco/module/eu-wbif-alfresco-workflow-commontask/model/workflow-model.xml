@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Definition of wbif Workflow Model -->
+<model name="wbwfct:wbifCommonTaskWorkflowModel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+	<!-- Optional meta-data about the model -->
+	<description>WBIF Common Task Workflow Model</description>
+	<author>Momcilo Dzunic</author>
+	<version>1.0</version>
+
+	<!-- Imports are required to allow references to definitions in other models -->
+	<imports>
+		<!-- Import Alfresco Dictionary Definitions -->
+		<import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+		<!-- Import Alfresco BPM Model Definitions -->
+		<import uri="http://www.alfresco.org/model/bpm/1.0" prefix="bpm" />
+	</imports>
+
+	<!-- Introduction of new namespaces defined by this model -->
+	<namespaces>
+		<namespace uri="http://www.wbif.eu/model/workflow/commontask/1.0" prefix="wbwfct" />
+	</namespaces>
+
+	<types>
+		<type name="wbwfct:commonTask">
+			<title>WBIF generic workflow user task</title>
+			<parent>bpm:startTask</parent>
+		</type>
+	</types>
+</model>

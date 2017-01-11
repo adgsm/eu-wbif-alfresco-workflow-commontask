@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.wbif.eu/model/workflow/commontask/1.0">
+  <process id="commonTask" name="Common user task" isExecutable="true">
+    <extensionElements>
+      <activiti:executionListener event="start" delegateExpression="${commonTaskInitializationVar}"></activiti:executionListener>
+    </extensionElements>
+    <startEvent id="startevent-common-task" name="Start" activiti:initiator="initiator" activiti:formKey="wbwfct:commonTask">
+      <extensionElements>
+        <activiti:executionListener event="start" delegateExpression="${commonTaskStartingVar}"></activiti:executionListener>
+      </extensionElements>
+    </startEvent>
+    <serviceTask id="servicetask-cleaning-activities" name="Cleaning activities" activiti:delegateExpression="${commonTaskCleaningVar}"></serviceTask>
+    <sequenceFlow id="flow-to-close" name="Close" sourceRef="servicetask-cleaning-activities" targetRef="endevent-common-task"></sequenceFlow>
+    <endEvent id="endevent-common-task" name="End">
+      <extensionElements>
+        <activiti:executionListener event="start" delegateExpression="${commonTaskEndingVar}"></activiti:executionListener>
+      </extensionElements>
+    </endEvent>
+    <serviceTask id="servicetask-prepare-environment-common-task" name="Prepare environment" activiti:delegateExpression="${commonTaskPrepareEnvironmentVar}"></serviceTask>
+    <intermediateCatchEvent id="timerintermediatecatchevent-user-task" name="UserTask">
+      <timerEventDefinition>
+        <timeDuration>${taskStart}</timeDuration>
+      </timerEventDefinition>
+    </intermediateCatchEvent>
+    <userTask id="usertask-common-task" name="User Task" activiti:candidateGroups="${candidate}" activiti:formKey="${candidateForm}">
+      <extensionElements>
+        <activiti:taskListener event="create" delegateExpression="${commonTaskCreationVar}"></activiti:taskListener>
+        <activiti:taskListener event="complete" delegateExpression="${commonTaskCompletionVar}"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow-to-task-done-common-task" sourceRef="usertask-common-task" targetRef="servicetask-done-activities-common-task"></sequenceFlow>
+    <serviceTask id="servicetask-done-activities-common-task" name="Done activities" activiti:delegateExpression="${commonTaskDoneVar}"></serviceTask>
+    <exclusiveGateway id="exclusivegateway-preapproved-common-task" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow-check-preapproved-common-task" sourceRef="servicetask-done-activities-common-task" targetRef="exclusivegateway-preapproved-common-task"></sequenceFlow>
+    <sequenceFlow id="flow-common-task-preapproved-done-conclude" sourceRef="exclusivegateway-preapproved-common-task" targetRef="servicetask-common-task-conclude">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${taskApproved == true}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow-approve-common-task" sourceRef="exclusivegateway-preapproved-common-task" targetRef="servicetask-common-task-permissions">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${taskApproved == false}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="servicetask-common-task-conclude" name="Conclude" activiti:delegateExpression="${commonTaskConcludeVar}"></serviceTask>
+    <sequenceFlow id="flow-common-task-conclude-cleaning" sourceRef="servicetask-common-task-conclude" targetRef="servicetask-cleaning-activities"></sequenceFlow>
+    <sequenceFlow id="flow-to-task-common-task" sourceRef="timerintermediatecatchevent-user-task" targetRef="usertask-common-task"></sequenceFlow>
+    <serviceTask id="servicetask-common-task-permissions" name="User task permissions" activiti:delegateExpression="${commonTaskPermissionsVar}"></serviceTask>
+    <sequenceFlow id="flow-task-permissions-common-task" sourceRef="servicetask-common-task-permissions" targetRef="usertask-common-task"></sequenceFlow>
+    <sequenceFlow id="flow-initialization-prepare" sourceRef="startevent-common-task" targetRef="servicetask-prepare-environment-common-task"></sequenceFlow>
+    <sequenceFlow id="flow-prepare-start-timer" sourceRef="servicetask-prepare-environment-common-task" targetRef="exclusivegateway-skip-common-task"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway-skip-common-task" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow-do-not-skip-common-task" sourceRef="exclusivegateway-skip-common-task" targetRef="timerintermediatecatchevent-user-task">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${taskSkip == false}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow-skip-common-task" sourceRef="exclusivegateway-skip-common-task" targetRef="endevent-common-task">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${taskSkip == true}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_commonTask">
+    <bpmndi:BPMNPlane bpmnElement="commonTask" id="BPMNPlane_commonTask">
+      <bpmndi:BPMNShape bpmnElement="startevent-common-task" id="BPMNShape_startevent-common-task">
+        <omgdc:Bounds height="35.0" width="35.0" x="140.0" y="11.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask-cleaning-activities" id="BPMNShape_servicetask-cleaning-activities">
+        <omgdc:Bounds height="55.0" width="105.0" x="859.0" y="150.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent-common-task" id="BPMNShape_endevent-common-task">
+        <omgdc:Bounds height="35.0" width="35.0" x="1021.0" y="160.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask-prepare-environment-common-task" id="BPMNShape_servicetask-prepare-environment-common-task">
+        <omgdc:Bounds height="55.0" width="105.0" x="220.0" y="1.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="timerintermediatecatchevent-user-task" id="BPMNShape_timerintermediatecatchevent-user-task">
+        <omgdc:Bounds height="35.0" width="35.0" x="470.0" y="11.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="usertask-common-task" id="BPMNShape_usertask-common-task">
+        <omgdc:Bounds height="55.0" width="105.0" x="540.0" y="1.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask-done-activities-common-task" id="BPMNShape_servicetask-done-activities-common-task">
+        <omgdc:Bounds height="55.0" width="105.0" x="690.0" y="1.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway-preapproved-common-task" id="BPMNShape_exclusivegateway-preapproved-common-task">
+        <omgdc:Bounds height="40.0" width="40.0" x="656.0" y="103.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask-common-task-conclude" id="BPMNShape_servicetask-common-task-conclude">
+        <omgdc:Bounds height="55.0" width="105.0" x="710.0" y="150.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask-common-task-permissions" id="BPMNShape_servicetask-common-task-permissions">
+        <omgdc:Bounds height="55.0" width="105.0" x="480.0" y="96.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway-skip-common-task" id="BPMNShape_exclusivegateway-skip-common-task">
+        <omgdc:Bounds height="40.0" width="40.0" x="380.0" y="8.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow-to-close" id="BPMNEdge_flow-to-close">
+        <omgdi:waypoint x="964.0" y="177.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1021.0" y="177.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="28.0" x="974.0" y="177.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow-to-task-done-common-task" id="BPMNEdge_flow-to-task-done-common-task">
+        <omgdi:waypoint x="645.0" y="28.0"></omgdi:waypoint>
+        <omgdi:waypoint x="690.0" y="28.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow-check-preapproved-common-task" id="BPMNEdge_flow-check-preapproved-common-task">
+        <omgdi:waypoint x="742.0" y="56.0"></omgdi:waypoint>
+        <omgdi:waypoint x="742.0" y="122.0"></omgdi:waypoint>
+        <omgdi:waypoint x="696.0" y="123.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow-common-task-preapproved-done-conclude" id="BPMNEdge_flow-common-task-preapproved-done-conclude">
+        <omgdi:waypoint x="676.0" y="143.0"></omgdi:waypoint>
+        <omgdi:waypoint x="675.0" y="177.0"></omgdi:waypoint>
+        <omgdi:waypoint x="710.0" y="177.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow-approve-common-task" id="BPMNEdge_flow-approve-common-task">
+        <omgdi:waypoint x="656.0" y="123.0"></omgdi:waypoint>
+        <omgdi:waypoint x="585.0" y="123.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow-common-task-conclude-cleaning" id="BPMNEdge_flow-common-task-conclude-cleaning">
+        <omgdi:waypoint x="815.0" y="177.0"></omgdi:waypoint>
+        <omgdi:waypoint x="859.0" y="177.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow-to-task-common-task" id="BPMNEdge_flow-to-task-common-task">
+        <omgdi:waypoint x="505.0" y="28.0"></omgdi:waypoint>
+        <omgdi:waypoint x="540.0" y="28.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow-task-permissions-common-task" id="BPMNEdge_flow-task-permissions-common-task">
+        <omgdi:waypoint x="532.0" y="96.0"></omgdi:waypoint>
+        <omgdi:waypoint x="531.0" y="72.0"></omgdi:waypoint>
+        <omgdi:waypoint x="591.0" y="72.0"></omgdi:waypoint>
+        <omgdi:waypoint x="592.0" y="56.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow-initialization-prepare" id="BPMNEdge_flow-initialization-prepare">
+        <omgdi:waypoint x="175.0" y="28.0"></omgdi:waypoint>
+        <omgdi:waypoint x="220.0" y="28.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow-prepare-start-timer" id="BPMNEdge_flow-prepare-start-timer">
+        <omgdi:waypoint x="325.0" y="28.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="28.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow-do-not-skip-common-task" id="BPMNEdge_flow-do-not-skip-common-task">
+        <omgdi:waypoint x="420.0" y="28.0"></omgdi:waypoint>
+        <omgdi:waypoint x="470.0" y="28.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow-skip-common-task" id="BPMNEdge_flow-skip-common-task">
+        <omgdi:waypoint x="400.0" y="48.0"></omgdi:waypoint>
+        <omgdi:waypoint x="401.0" y="229.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1039.0" y="229.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1038.0" y="195.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
